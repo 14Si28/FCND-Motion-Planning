@@ -37,6 +37,7 @@ The steps involved into the complete planning are as follows :-
 * It defines the grid, altitude and margins from smooth transitions.
 * Finally it uses `a_star()` function for planning the optimal path for the problem.
 
+![Quad Image](./run2.png)
 
 
 ### Implementing Your Path Planning Algorithm
@@ -91,13 +92,39 @@ local_goal = global_to_local((lon0, lat0, 0), self.global_home)
 Here multiple lat0, lon0 is provided based on the simulators current pos.
 
 #### 5. Modify A* to include diagonal motion (or replace A* altogether)
-Minimal requirement here is to modify the code in planning_utils() to update the A* implementation to include diagonal motions on the grid that have a cost of sqrt(2), but more creative solutions are welcome. Explain the code you used to accomplish this step.
+Minimal requirement here is to modify the code in planning_utils() to update the A* implementation to include diagonal motions on the grid that have a cost of sqrt(2), but more creative solutions are welcome. I  used the  following code to accomplish this step.
+
+Here for diagonal moves, following actions are added in `Action` enum.
+```python
+
+NORTH_WEST = (-1, -1, 1.41)
+SOUTH_WEST = (1, -1, 1.41)
+NORTH_EAST = (-1, 1, 1.41)
+SOUTH_EAST = (1, 1, 1.41)
+
+```
+
+According to the new diagonal actions defined above, following changes are made in `valid_actions()` function.
+
+```python
+if x - 1 < 0 or grid[x-1, y-1] == 1:
+    valid_actions.remove(Action.NORTH_WEST)
+if x + 1 > n or grid[x+1, y-1] == 1:
+    valid_actions.remove(Action.SOUTH_WEST)
+if y - 1 < 0 or grid[x-1, y+1] == 1:
+    valid_actions.remove(Action.NORTH_EAST)
+if y + 1 > m or grid[x+1, y+1] == 1:
+    valid_actions.remove(Action.SOUTH_EAST)
+
+``` 
 
 #### 6. Cull waypoints 
-For this step you can use a collinearity test or ray tracing method like Bresenham. The idea is simply to prune your path of unnecessary waypoints. Explain the code you used to accomplish this step.
+For this step you can use a collinearity test or ray tracing method like Bresenham. The idea is simply to prune your path of unnecessary waypoints. Following is the code you I to accomplish this step.
 
 
 Thee following code is used in my project to prune path and for collinearity check of the points.
+
+Here I check for the each and every point available and if the 2 points are in collinear than the middle point is removed.
 
 ```python
 
@@ -124,9 +151,13 @@ def prune_path(path):
 waypoints = [[p[0] + north_offset, p[1] + east_offset, TARGET_ALTITUDE, 0] for p in prune_path(path)]
 ```
 
+Here in the last line, the complete formatted (pruned) waypoints are created.
+
 ### Execute the flight
 #### 1. Does it work?
 It works!
+
+![Quad Image](./run1.png)
 
 ### Double check that you've met specifications for each of the [rubric](https://review.udacity.com/#!/rubrics/1534/view) points.
   
